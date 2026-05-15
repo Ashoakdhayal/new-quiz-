@@ -1,0 +1,277 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.wrap{padding:1rem 0;max-width:680px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem}
+.btn{display:inline-flex;align-items:center;gap:6px;background:transparent;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:8px 16px;font-size:14px;font-weight:500;cursor:pointer;color:var(--color-text-primary);transition:background 0.15s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn-primary{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.btn-primary:hover{background:#0F6E56}
+.opt-btn{width:100%;text-align:left;background:transparent;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 14px;font-size:14px;cursor:pointer;color:var(--color-text-primary);margin-bottom:8px;transition:all 0.15s;line-height:1.5}
+.opt-btn:hover{background:var(--color-background-secondary);border-color:var(--color-border-secondary)}
+.opt-btn.correct{background:#EAF3DE;border-color:#639922;color:#27500A}
+.opt-btn.wrong{background:#FCEBEB;border-color:#A32D2D;color:#501313}
+.opt-btn.reveal{background:#E6F1FB;border-color:#185FA5;color:#0C447C}
+.opt-btn:disabled{cursor:default}
+.badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:var(--border-radius-md)}
+.badge-q{background:#EEEDFE;color:#3C3489}
+.badge-score{background:#EAF3DE;color:#27500A}
+.rank-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:14px}
+.rank-no{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0}
+.r1{background:#FAEEDA;color:#633806}
+.r2{background:#D3D1C7;color:#2C2C2A}
+.r3{background:#FAECE7;color:#4A1B0C}
+.rn{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.expl{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin-top:10px}
+.store-link{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);text-decoration:none;color:var(--color-text-primary);font-size:13px;margin-top:1rem}
+.store-link:hover{background:var(--color-background-primary)}
+.prog-bar{height:4px;background:var(--color-border-tertiary);border-radius:2px;margin:12px 0}
+.prog-fill{height:4px;background:#1D9E75;border-radius:2px;transition:width 0.3s}
+input[type=text]{width:100%;padding:10px 12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:15px;background:var(--color-background-primary);color:var(--color-text-primary)}
+input[type=text]:focus{outline:none;box-shadow:0 0 0 2px #1D9E75}
+</style>
+
+<div class="wrap" id="root"></div>
+
+<script>
+const QUESTIONS = [
+{q:"सूची-I को सूची-II से सुमेलित करें — खो→जयपुर, बैराठ→अलवर, देवगढ़→भीलवाड़ा, रिसा पोक→जालोर",opts:["(a)-(ii),(b)-(i),(c)-(iii),(d)-(iv)","(a)-(i),(b)-(ii),(c)-(iv),(d)-(iii)","(a)-(ii),(b)-(i),(c)-(iv),(d)-(iii)","(a)-(i),(b)-(ii),(c)-(iii),(d)-(iv)"],ans:0,expl:"'खो' चोटी जयपुर (920 मी.), बैराठ अलवर (अब कोटपूतली-बहरोड़), देवगढ़ भीलवाड़ा-राजसमंद, रिसा पोक (रोजा भाकर) जालोर में है।"},
+{q:"अभिकथन A: संरक्षण आरक्षीत क्षेत्र भूपरिदृश्य, वनस्पति, प्राणि और पर्यावास के संरक्षण हेतु घोषित होते हैं। कारण R: मुहाना, रतनगढ़ और अजमेर में शहरी वन बाग विकसित करने की योजना है।",opts:["A सही नहीं लेकिन R सही","A और R दोनों सही और R, A की सही व्याख्या","A और R दोनों सही, लेकिन R, A की व्याख्या नहीं","A सही लेकिन R सही नहीं"],ans:2,expl:"A बिल्कुल सही है। R भी राज्य सरकार की योजना के रूप में सही है, परंतु R, A का सही कारण स्पष्ट नहीं करता।"},
+{q:"कौन सी झील अपवाहन (Deflation) से निर्मित 'प्लाया' झील का उदाहरण है?",opts:["सांभर","लूणकरणसर","डीडवाना","पचपदरा"],ans:2,expl:"पवन अपवाहन से बने गर्तों में जल भरने से 'प्लाया' झील बनती है। डीडवाना इसका प्रमुख उदाहरण है।"},
+{q:"राजस्थान के संतों को कालक्रमानुसार व्यवस्थित करें — पीपा, लालदास, दादूदयाल, धन्ना",opts:["(d),(a),(b),(c)","(a),(b),(c),(d)","(b),(c),(d),(a)","(c),(d),(a),(b)"],ans:0,expl:"धन्ना (1415), पीपा (1425), लालदास (1540), दादूदयाल (1544)।"},
+{q:"सूची-I को सूची-II से सुमेलित करें — सिलिसेढ़ झील, ऋषभदेव, कुम्भलगढ़, रणकपुर",opts:["(a)-(i),(b)-(ii),(c)-(iv),(d)-(iii)","(a)-(i),(b)-(ii),(c)-(iii),(d)-(iv)","(a)-(ii),(b)-(i),(c)-(iv),(d)-(iii)","(a)-(ii),(b)-(i),(c)-(iii),(d)-(iv)"],ans:2,expl:"सिलिसेढ़→अलवर, ऋषभदेव→उदयपुर, कुम्भलगढ़→राजसमंद, रणकपुर→पाली।"},
+{q:"अभिकथन A: राजस्थान के खनिज संसाधन विविध और विभिन्न प्रदेशों में वितरित हैं। कारण R: राजस्थान देश में कैल्साइट का अग्रणी उत्पादक है।",opts:["A सही नहीं लेकिन R सही","A और R दोनों सही और R, A की सही व्याख्या","A और R दोनों सही, लेकिन R, A की व्याख्या नहीं","A सही लेकिन R सही नहीं"],ans:2,expl:"राजस्थान खनिजों का अजायबघर है (A सही) और कैल्साइट अग्रणी उत्पादक भी है (R सही), पर R, A की व्याख्या नहीं।"},
+{q:"साबरमती नदी के बारे में कौन से कथन सत्य हैं? (a) यह पश्चिमवाही नदी है (b) पनम इसकी सहायक नदी है (c) उद्गम अरावली में (d) राजस्थान में लंबाई गुजरात से अधिक",opts:["(c) और (d)","(a) और (b)","(a) और (c)","(b) और (d)"],ans:2,expl:"साबरमती पश्चिमवाही है (a ✓), उद्गम उदयपुर में अरावली से (c ✓)। पनम इसकी सहायक नहीं और गुजरात में लंबाई अधिक है।"},
+{q:"थॉर्नथवे के जलवायु प्रदेशों के आधार पर चुरू, अजमेर, बूंदी, सवाई माधोपुर और टोंक किस प्रदेश में हैं?",opts:["DA'w","EA'd","CA'w","DB'w"],ans:0,expl:"थॉर्नथवेट वर्गीकरण में DA'w (उष्ण कटिबंधीय अर्द्ध-शुष्क) में राजस्थान का मध्य और पूर्वी भाग आता है।"},
+{q:"सूची-I को सूची-II से सुमेलित करें — बावड़ी, जोहड़, टांका, कुण्ड",opts:["(a)-(iii),(b)-(ii),(c)-(i),(d)-(iv)","(a)-(iv),(b)-(iii),(c)-(ii),(d)-(i)","(a)-(i),(b)-(ii),(c)-(iii),(d)-(iv)","(a)-(ii),(b)-(iii),(c)-(iv),(d)-(i)"],ans:2,expl:"बावड़ी=सीढ़ीनुमा कुआं, जोहड़=मिट्टी के छोटे बांध, टांका=बेलनाकार भूमिगत गड्ढा, कुण्ड=तश्तरीनुमा।"},
+{q:"सूची-I को सूची-II से सुमेलित करें — पीरू सिंह, विजय सिंह पथिक, कृपाल सिंह शेखावत, अल्लाह जिलाई बाई",opts:["(a)-(iii),(b)-(ii),(c)-(i),(d)-(iv)","(a)-(iv),(b)-(iii),(c)-(ii),(d)-(i)","(a)-(ii),(b)-(iii),(c)-(iv),(d)-(i)","(a)-(i),(b)-(ii),(c)-(iv),(d)-(iii)"],ans:3,expl:"पीरू सिंह→परमवीर चक्र, विजय सिंह पथिक→बिजोलिया आंदोलन, कृपाल सिंह शेखावत→ब्लू पॉटरी, अल्लाह जिलाई बाई→लोक गायिका।"},
+{q:"जनगणना 2011 के अनुसार जनजातीय जनसंख्या के अवरोही क्रम में व्यवस्थित करें — उदयपुर, बांसवाड़ा, डूंगरपुर, प्रतापगढ़",opts:["(d),(a),(b),(c)","(a),(b),(c),(d)","(b),(c),(d),(a)","(c),(d),(a),(b)"],ans:1,expl:"2011 अनुसार ST जनसंख्या घटते क्रम में: उदयपुर > बांसवाड़ा > डूंगरपुर > प्रतापगढ़।"},
+{q:"वन प्रबंधन के दृष्टिकोण से राजस्थान को कितने वन्यजीव मंडलों में बांटा गया है?",opts:["18","15","17","16"],ans:3,expl:"राजस्थान वन विभाग ने राज्य को 16 वन्यजीव मंडलों (Wildlife Circles) में विभाजित किया है।"},
+{q:"सूची-I को सूची-II से सुमेलित करें — सूरतगढ़, छाबड़ा, कालीसिंध, गुरहा/गुढ़ा (तापीय विद्युत परियोजना)",opts:["(a)-(iii),(b)-(iv),(c)-(i),(d)-(ii)","(a)-(iv),(b)-(iii),(c)-(ii),(d)-(i)","(a)-(iv),(b)-(iii),(c)-(i),(d)-(ii)","(a)-(iii),(b)-(iv),(c)-(ii),(d)-(i)"],ans:0,expl:"सूरतगढ़→श्रीगंगानगर, छबड़ा→बारां, कालीसिंध→झालावाड़, गुढ़ा→बीकानेर।"},
+{q:"राजस्थान के दुर्गों के संदर्भ में सही कथन कौन से हैं? (a) गिरि दुर्ग ऊंचे पर्वतों में (b) सैन्य दुर्ग में सैनिक रहते (c) वन दुर्ग मैदान में किंतु अगम्य (d) धान्वन दुर्ग चारों ओर जल से घिरा",opts:["(b) और (d)","(a) और (d)","(b) और (c)","(a) और (b)"],ans:3,expl:"(a)(b) सही। (c) गलत — वन दुर्ग जंगल में होता है। (d) गलत — चारों ओर जल से घिरा = जल/औदक दुर्ग; धान्वन = मरुस्थल में।"},
+{q:"राजस्थान की एकमात्र सदानीरा / वर्षवाही नदी कौन सी है?",opts:["साबरमती","चंबल","लूणी","बाणगंगा"],ans:1,expl:"चंबल (चर्मण्यवती) में वर्षभर जल बहता है, इसीलिए इसे सदानीरा/नित्यवाही नदी कहते हैं।"},
+{q:"केवलादेव घाना राष्ट्रीय उद्यान के बारे में सत्य कथन — (a) पक्षियों का स्वर्ग (b) 1981 में संरक्षित पक्षी अभ्यारण्य (c) विश्व विरासत स्थल (d) 1985 में रामसर स्थल",opts:["(a) और (c)","(a),(c) और (d)","(b),(c) और (d)","(a) और (d)"],ans:0,expl:"पक्षियों का स्वर्ग (a ✓) और 1985 में UNESCO विश्व धरोहर (c ✓)। 1956 में पक्षी अभ्यारण्य, 1981 में राष्ट्रीय उद्यान और 1981 में रामसर साइट बना।"},
+{q:"अभिकथन A: बेर में अत्यधिक छंटाई की जाती है जो नई शाखाओं की वृद्धि सुगम करती है। कारण R: छंटाई का श्रेष्ठ समय दिसंबर-जनवरी है।",opts:["A सही नहीं लेकिन R सही","A और R दोनों सही और R, A की व्याख्या","A और R दोनों सही, लेकिन R, A की व्याख्या नहीं","A सही लेकिन R सही नहीं"],ans:3,expl:"बेर में प्रूनिंग आवश्यक है (A ✓)। छंटाई का उचित समय अप्रैल-मई है, दिसंबर-जनवरी नहीं (R ✗)।"},
+{q:"अभिकथन A: हुरड़ा सम्मेलन की अध्यक्षता जगत सिंह II द्वारा की गई। कारण R: यह सम्मेलन राजस्थान के शासकों में एकता बनाए रखने का सफल प्रयास था।",opts:["A सही नहीं लेकिन R सही","A और R दोनों सही और R, A की व्याख्या","A और R दोनों सही, लेकिन R, A की व्याख्या नहीं","A सही लेकिन R सही नहीं"],ans:3,expl:"17 जुलाई 1734 को हुरड़ा सम्मेलन — मेवाड़ महाराणा जगत सिंह II की अध्यक्षता (A ✓)। आपसी मतभेदों के कारण सम्मेलन असफल रहा (R ✗)।"},
+{q:"अभिकथन A: राजस्थान में अधिकांश आधुनिक सूती वस्त्र मिलें सरकारी सहायता के बिना स्थापित हुईं। कारण R: सूती वस्त्र राजस्थान का परंपरागत और प्राचीन उद्योग है।",opts:["A सही नहीं लेकिन R सही","A और R दोनों सही और R, A की व्याख्या","A और R दोनों सही, लेकिन R, A की व्याख्या नहीं","A सही लेकिन R सही नहीं"],ans:2,expl:"अधिकांश मिलें निजी क्षेत्र द्वारा (A ✓), प्राचीन उद्योग भी है (R ✓), पर R, A का कारण स्पष्ट नहीं करता।"},
+{q:"टंगस्टन के बारे में सत्य कथन — (a) सामान्य खनिज, कोई रणनीतिक महत्व नहीं (b) वोलफ्रेमाइट अयस्क से प्राप्त (c) ग्रेनाइट और पैगमेटाइट चट्टानों में (d) मुख्य निक्षेप भीलवाड़ा और अलवर में",opts:["(c) और (d)","(a) और (b)","(a) और (d)","(b) और (c)"],ans:3,expl:"टंगस्टन सामरिक दृष्टि से महत्वपूर्ण खनिज है (a ✗)। मुख्य भंडार नागौर (डेगाना) और सिरोही में हैं (d ✗)। अयस्क वुलफ्रेमाइट है (b ✓) और ग्रेनाइट/पैगमेटाइट में पाया जाता है (c ✓)।"},
+{q:"राजस्थान के भौतिक प्रदेशों को दक्षिण-पूर्व से उत्तर-पश्चिम में व्यवस्थित करें — हाड़ौती पठार, बनास मैदान, अरावली, पश्चिमी रेतीला मैदान",opts:["(d),(a),(b),(c)","(a),(b),(c),(d)","(b),(c),(d),(a)","(c),(d),(a),(b)"],ans:1,expl:"दक्षिण-पूर्व→उत्तर-पश्चिम: हाड़ौती (SE) → बनास मैदान → अरावली (मध्य) → पश्चिमी रेतीला मैदान (NW)।"},
+{q:"अभिकथन A: राजस्थान मेलों और पर्वों की भूमि है। कारण R: तीज, गणगौर, राजस्थान दिवस, पुष्कर मेला और ऊँट पर्व प्रमुख मेले हैं।",opts:["A सही नहीं लेकिन R सही","A और R दोनों सही और R, A की सही व्याख्या","A और R दोनों सही, लेकिन R, A की व्याख्या नहीं","A सही लेकिन R सही नहीं"],ans:1,expl:"A और R दोनों सही हैं और R, A का सीधा प्रमाण व कारण है।"},
+{q:"राजस्थान का कौन सा जिला उद्यान कृषि उत्पादन में अग्रणी है और 'मिनी-नागपुर' कहलाता है?",opts:["झालावाड़","भीलवाड़ा","चित्तौड़","सवाई माधोपुर"],ans:0,expl:"संतरा उत्पादन में विशिष्ट पहचान के कारण झालावाड़ को 'मिनी-नागपुर' कहा जाता है।"},
+{q:"राजस्थान के कृषि जलवायु प्रदेशों को दक्षिण से उत्तर में व्यवस्थित करें — अर्ध-शुष्क पूर्वी मैदान, सिंचित उत्तरी-पश्चिमी मैदान, आर्द्र दक्षिणी मैदान, उप-आर्द्र दक्षिणी मैदान",opts:["(d),(a),(b),(c)","(a),(b),(c),(d)","(b),(c),(d),(a)","(c),(d),(a),(b)"],ans:3,expl:"दक्षिण→उत्तर: आर्द्र दक्षिणी (बांसवाड़ा) → उप-आर्द्र दक्षिणी (उदयपुर) → अर्ध-शुष्क पूर्वी (जयपुर) → सिंचित उत्तरी-पश्चिमी (गंगानगर)।"},
+{q:"आभूषण निर्माण के बारे में सत्य कथन — (a) जयपुर विश्व प्रसिद्ध (b) नाथद्वारा स्वर्ण आभूषणों के लिए (c) तारकशी=महीन धातु तारों से बने आभूषण (d) अलवर थेवा कला के लिए प्रसिद्ध",opts:["(b) और (c)","(b) और (d)","(a) और (c)","(a) और (d)"],ans:2,expl:"जयपुर रत्न और आभूषण (मीनाकारी) के लिए प्रसिद्ध (a ✓)। तारकशी चांदी के बारीक तारों का काम — नाथद्वारा में (c ✓)। थेवा कला प्रतापगढ़ की है (d ✗)।"},
+{q:"ऐतिहासिक घटनाओं को कालक्रमानुसार व्यवस्थित करें — तुंगा का युद्ध, बगरू का युद्ध, हुरड़ा सम्मेलन, औरंगजेब की मृत्यु",opts:["(d),(c),(b),(a)","(c),(d),(a),(b)","(d),(c),(a),(b)","(c),(d),(b),(a)"],ans:0,expl:"औरंगजेब मृत्यु (1707) → हुरड़ा (1734) → बगरू (1748) → तुंगा (1787)।"}
+];
+
+const STORE_KEY = "krishi_leaderboard_v1";
+
+let state = {
+  screen: "home",
+  name: "",
+  cur: 0,
+  selected: null,
+  score: 0,
+  answers: [],
+  leaderboard: []
+};
+
+async function loadLeaderboard() {
+  try {
+    const r = await window.storage.get(STORE_KEY, true);
+    if (r && r.value) state.leaderboard = JSON.parse(r.value);
+  } catch(e) { state.leaderboard = []; }
+}
+
+async function saveLeaderboard() {
+  try {
+    await window.storage.set(STORE_KEY, JSON.stringify(state.leaderboard), true);
+  } catch(e) {}
+}
+
+function getRank(score) {
+  if (score >= 24) return "🥇 टॉपर";
+  if (score >= 20) return "🥈 उत्कृष्ट";
+  if (score >= 15) return "🥉 अच्छा";
+  if (score >= 10) return "✅ ठीक";
+  return "📚 और पढ़ें";
+}
+
+function pct(s) { return Math.round((s/QUESTIONS.length)*100); }
+
+function render() {
+  const root = document.getElementById("root");
+  if (state.screen === "home") renderHome(root);
+  else if (state.screen === "quiz") renderQuiz(root);
+  else if (state.screen === "result") renderResult(root);
+  else if (state.screen === "review") renderReview(root);
+  else if (state.screen === "board") renderBoard(root);
+}
+
+function renderHome(root) {
+  root.innerHTML = `
+    <h2 class="sr-only">कृषि पर्यवेक्षक भर्ती 2026 MCQ Quiz</h2>
+    <div class="card" style="text-align:center;margin-bottom:1rem">
+      <div style="font-size:11px;font-weight:500;letter-spacing:1px;color:var(--color-text-secondary);margin-bottom:8px">RAJASTHAN GK</div>
+      <div style="font-size:20px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">[कृषि पर्यवेक्षक भर्ती 2026]</div>
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1.5rem">कुल प्रश्न: ${QUESTIONS.length} &nbsp;|&nbsp; प्रत्येक सही उत्तर: 1 अंक</div>
+      <input type="text" id="nameInput" placeholder="अपना नाम दर्ज करें..." maxlength="40" style="margin-bottom:1rem" />
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="startQuiz()">Quiz शुरू करें &nbsp;→</button>
+        <button class="btn" onclick="showBoard()"><i class="ti ti-trophy" aria-hidden="true"></i> Leaderboard</button>
+      </div>
+    </div>
+    <a href="https://play.google.com/store/apps/details?id=co.griffin.qpxbh" class="store-link" target="_blank">
+      <i class="ti ti-brand-google-play" style="font-size:20px;color:#1D9E75" aria-hidden="true"></i>
+      <div>
+        <div style="font-size:13px;font-weight:500">Aryabhatt Exam App</div>
+        <div style="font-size:11px;color:var(--color-text-secondary)">Google Play Store पर डाउनलोड करें</div>
+      </div>
+      <i class="ti ti-external-link" style="margin-left:auto;font-size:16px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+    </a>`;
+}
+
+function startQuiz() {
+  const n = document.getElementById("nameInput").value.trim();
+  if (!n) { document.getElementById("nameInput").focus(); return; }
+  state.name = n;
+  state.cur = 0; state.score = 0; state.answers = []; state.selected = null;
+  state.screen = "quiz";
+  render();
+}
+
+function renderQuiz(root) {
+  const q = QUESTIONS[state.cur];
+  const prog = Math.round(((state.cur)/QUESTIONS.length)*100);
+  let optsHTML = q.opts.map((o,i) => {
+    let cls = "opt-btn";
+    if (state.selected !== null) {
+      if (i === q.ans) cls += " correct";
+      else if (i === state.selected && i !== q.ans) cls += " wrong";
+      else cls += "";
+    }
+    return `<button class="${cls}" onclick="selectOpt(${i})" ${state.selected!==null?"disabled":""}>${String.fromCharCode(65+i)}) ${o}</button>`;
+  }).join("");
+  const explHTML = state.selected !== null ? `<div class="expl"><strong>व्याख्या:</strong> ${q.expl}</div>` : "";
+  root.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <span style="font-size:13px;color:var(--color-text-secondary)">प्रश्न ${state.cur+1} / ${QUESTIONS.length}</span>
+      <span class="badge badge-score">स्कोर: ${state.score}</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:${prog}%"></div></div>
+    <div class="card" style="margin-bottom:1rem">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px">
+        <span class="badge badge-q">Q${state.cur+1}</span>
+      </div>
+      <p style="font-size:15px;line-height:1.7;color:var(--color-text-primary);margin-bottom:1rem">${q.q}</p>
+      ${optsHTML}
+      ${explHTML}
+      ${state.selected !== null ? `<div style="margin-top:12px;text-align:right">
+        <button class="btn btn-primary" onclick="nextQ()">${state.cur < QUESTIONS.length-1 ? "अगला प्रश्न →" : "परिणाम देखें →"}</button>
+      </div>` : ""}
+    </div>`;
+}
+
+function selectOpt(i) {
+  if (state.selected !== null) return;
+  state.selected = i;
+  if (i === QUESTIONS[state.cur].ans) state.score++;
+  state.answers.push(i);
+  render();
+}
+
+async function nextQ() {
+  state.cur++;
+  state.selected = null;
+  if (state.cur >= QUESTIONS.length) {
+    const entry = { name: state.name, score: state.score, total: QUESTIONS.length, pct: pct(state.score), date: new Date().toLocaleDateString("hi-IN") };
+    state.leaderboard.push(entry);
+    state.leaderboard.sort((a,b) => b.score - a.score);
+    if (state.leaderboard.length > 50) state.leaderboard = state.leaderboard.slice(0,50);
+    await saveLeaderboard();
+    state.screen = "result";
+  }
+  render();
+}
+
+function renderResult(root) {
+  const rank = getRank(state.score);
+  const pos = state.leaderboard.findIndex(e => e.name === state.name && e.score === state.score) + 1;
+  root.innerHTML = `
+    <div class="card" style="text-align:center;margin-bottom:1rem">
+      <div style="font-size:28px;margin-bottom:8px">${rank}</div>
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:4px">${state.name}</div>
+      <div style="font-size:36px;font-weight:500;color:#1D9E75;margin-bottom:4px">${state.score} / ${QUESTIONS.length}</div>
+      <div style="font-size:15px;color:var(--color-text-secondary);margin-bottom:1rem">${pct(state.score)}% सही</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="showReview()"><i class="ti ti-list-check" aria-hidden="true"></i> उत्तर देखें</button>
+        <button class="btn" onclick="showBoard()"><i class="ti ti-trophy" aria-hidden="true"></i> Leaderboard</button>
+        <button class="btn" onclick="goHome()"><i class="ti ti-refresh" aria-hidden="true"></i> फिर से खेलें</button>
+      </div>
+    </div>
+    <a href="https://play.google.com/store/apps/details?id=co.griffin.qpxbh" class="store-link" target="_blank">
+      <i class="ti ti-brand-google-play" style="font-size:20px;color:#1D9E75" aria-hidden="true"></i>
+      <div>
+        <div style="font-size:13px;font-weight:500">Aryabhatt Exam App — और प्रश्न</div>
+        <div style="font-size:11px;color:var(--color-text-secondary)">Play Store से डाउनलोड करें</div>
+      </div>
+      <i class="ti ti-external-link" style="margin-left:auto;font-size:16px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+    </a>`;
+}
+
+function renderReview(root) {
+  const rows = QUESTIONS.map((q,i) => {
+    const sel = state.answers[i];
+    const ok = sel === q.ans;
+    return `<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
+        <span class="badge badge-q">Q${i+1}</span>
+        <span style="font-size:13px;color:${ok?"#27500A":"#501313"};font-weight:500">${ok?"✓ सही":"✗ गलत"}</span>
+      </div>
+      <p style="font-size:13px;line-height:1.6;margin-bottom:8px">${q.q}</p>
+      <div style="font-size:12px;margin-bottom:4px"><span style="color:#27500A;font-weight:500">सही: </span>${q.opts[q.ans]}</div>
+      ${!ok ? `<div style="font-size:12px;margin-bottom:6px"><span style="color:#A32D2D;font-weight:500">आपका: </span>${q.opts[sel]}</div>` : ""}
+      <div class="expl" style="font-size:12px">${q.expl}</div>
+    </div>`;
+  }).join("");
+  root.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+      <button class="btn" onclick="state.screen='result';render()"><i class="ti ti-arrow-left" aria-hidden="true"></i> वापस</button>
+      <span style="font-size:15px;font-weight:500">उत्तर समीक्षा</span>
+      <span class="badge badge-score" style="margin-left:auto">${state.score}/${QUESTIONS.length}</span>
+    </div>
+    ${rows}`;
+}
+
+function renderBoard(root) {
+  const rows = state.leaderboard.slice(0,20).map((e,i) => {
+    const cls = i===0?"r1":i===1?"r2":i===2?"r3":"rn";
+    return `<div class="rank-row">
+      <div class="rank-no ${cls}">${i+1}</div>
+      <div style="flex:1;font-size:14px;font-weight:500">${e.name}</div>
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-right:8px">${e.date||""}</div>
+      <span class="badge badge-score">${e.score}/${e.total}</span>
+    </div>`;
+  }).join("") || `<div style="text-align:center;padding:1.5rem;color:var(--color-text-secondary);font-size:14px">अभी कोई स्कोर नहीं। Quiz खेलें!</div>`;
+  root.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+      <button class="btn" onclick="goHome()"><i class="ti ti-arrow-left" aria-hidden="true"></i> वापस</button>
+      <span style="font-size:16px;font-weight:500"><i class="ti ti-trophy" style="font-size:18px;vertical-align:-2px;margin-right:6px;color:#BA7517" aria-hidden="true"></i>Leaderboard</span>
+    </div>
+    <div class="card" style="margin-bottom:1rem">${rows}</div>
+    <a href="https://play.google.com/store/apps/details?id=co.griffin.qpxbh" class="store-link" target="_blank">
+      <i class="ti ti-brand-google-play" style="font-size:20px;color:#1D9E75" aria-hidden="true"></i>
+      <div>
+        <div style="font-size:13px;font-weight:500">Aryabhatt Exam App</div>
+        <div style="font-size:11px;color:var(--color-text-secondary)">Google Play Store पर डाउनलोड करें</div>
+      </div>
+      <i class="ti ti-external-link" style="margin-left:auto;font-size:16px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+    </a>`;
+}
+
+function showBoard() { state.screen="board"; render(); }
+function showReview() { state.screen="review"; render(); }
+function goHome() { state.screen="home"; render(); }
+
+(async () => { await loadLeaderboard(); render(); })();
+</script>
